@@ -161,14 +161,14 @@ func (es *EmbeddingService) embedViaAPI(text string) ([]float32, error) {
 
 	embedding := apiResp.Data[0].Embedding
 
-	// Set dims on first successful call
-	if es.dims == 0 {
+	// Set dims on first successful call (thread-safe)
+	es.dimsOnce.Do(func() {
 		es.dims = len(embedding)
 		logger.InfoCF("oracle", "Embedding dimensions detected", map[string]interface{}{
 			"dims":  es.dims,
 			"model": es.apiModel,
 		})
-	}
+	})
 
 	return embedding, nil
 }
